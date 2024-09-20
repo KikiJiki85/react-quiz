@@ -1,10 +1,11 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
+import { ReactNode } from 'react';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+interface MainProps {
+  children: ReactNode;
+}
+
+function Main({ children }: MainProps) {
+  return <main className="main">{children}</main>;
+}
+
+export default Main;
