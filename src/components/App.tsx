@@ -18,37 +18,43 @@ type Status = 'loading' | 'error' | 'ready' | 'active' | 'finished';
 export type Action =
   | { type: 'dataReceived'; payload: QuestionType[] }
   | { type: 'dataFailed' }
-  | { type: 'start' };
+  | { type: 'start' }
+  | { type: 'newAnswer'; payload: State['answer'] };
 
 interface State {
   questions: QuestionType[];
   status: Status;
   index: number;
+  answer: number | null;
 }
 
 const initialState: State = {
   questions: [],
   status: 'loading',
   index: 0,
+  answer: null,
 };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'dataReceived':
       return { ...state, questions: action.payload, status: 'ready' };
-    case 'dataFailed': {
+    case 'dataFailed':
       return { ...state, status: 'error' };
-    }
-    case 'start': {
+
+    case 'start':
       return { ...state, status: 'active' };
-    }
+
+    case 'newAnswer':
+      return { ...state, answer: action.payload };
+
     default:
       return state;
   }
 }
 
 function App() {
-  const [{ questions, index, status }, dispatch] = useReducer(
+  const [{ questions, index, status, answer }, dispatch] = useReducer(
     reducer,
     initialState
   );
@@ -76,7 +82,13 @@ function App() {
         {status === 'ready' && (
           <StartScreen numberOfQuestions={numQuestions} dispatch={dispatch} />
         )}
-        {status === 'active' && <Question question={questions[index]} />}
+        {status === 'active' && (
+          <Question
+            question={questions[index]}
+            dispatch={dispatch}
+            answer={answer}
+          />
+        )}
       </Main>
     </div>
   );
