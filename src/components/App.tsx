@@ -4,8 +4,9 @@ import Main from './Main';
 import Loader from './Loader';
 import Error from './Error';
 import StartScreen from './StartScreen';
+import Question from './Question';
 
-interface Question {
+export interface QuestionType {
   question?: string;
   options?: string[];
   correctOption?: number;
@@ -14,18 +15,21 @@ interface Question {
 
 type Status = 'loading' | 'error' | 'ready' | 'active' | 'finished';
 
-type Action =
-  | { type: 'dataReceived'; payload: Question[] }
-  | { type: 'dataFailed' };
+export type Action =
+  | { type: 'dataReceived'; payload: QuestionType[] }
+  | { type: 'dataFailed' }
+  | { type: 'start' };
 
 interface State {
-  questions: Question[];
+  questions: QuestionType[];
   status: Status;
+  index: number;
 }
 
 const initialState: State = {
   questions: [],
   status: 'loading',
+  index: 0,
 };
 
 function reducer(state: State, action: Action): State {
@@ -35,13 +39,19 @@ function reducer(state: State, action: Action): State {
     case 'dataFailed': {
       return { ...state, status: 'error' };
     }
+    case 'start': {
+      return { ...state, status: 'active' };
+    }
     default:
       return state;
   }
 }
 
 function App() {
-  const [{ questions, status }, dispatch] = useReducer(reducer, initialState);
+  const [{ questions, index, status }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
   const numQuestions = questions.length;
 
   useEffect(() => {
@@ -63,7 +73,10 @@ function App() {
       <Main>
         {status === 'loading' && <Loader />}
         {status === 'error' && <Error />}
-        {status === 'ready' && <StartScreen numberOfQuestions={numQuestions} />}
+        {status === 'ready' && (
+          <StartScreen numberOfQuestions={numQuestions} dispatch={dispatch} />
+        )}
+        {status === 'active' && <Question question={questions[index]} />}
       </Main>
     </div>
   );
